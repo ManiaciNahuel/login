@@ -8,6 +8,7 @@ const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true}
 const app = express()
 app.use(cookieParser())
 app.use(express.json())
+app.use(express.urlencoded())
 
 app.use(session({
     //store: new FileStore({path: './sesiones', ttl: 60}),
@@ -18,47 +19,34 @@ app.use(session({
     
     secret: 'secreto',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 100000
+    }
 }))
 
-/* app.post('/cookies', (req, res) => {
-    const { nombre, valor, tiempo} = req.body
-    
-    if (!nombre || !valor) {
-        return res.json("Falta el nombre o el valor")
-    }
-    if (tiempo) {
-        res.cookie(nombre, valor, { signed: true, maxAge: 1000* parseInt(tiempo)})
-    } else {
-        res.cookie(nombre, valor, { signed: true})
-    }
-    console.log(nombre, valor, tiempo);
-    res.json({proceso: "OK"})
-}) 
-app.get('/cookies', (req, res) => {
-    console.log(req.cookies)
-    res.json({normales: req.cookies, firmadas: req.signedCookies})
-}) */
-
-app.post('/cookiesSessions', (req, res) => {
+app.post('/login', (req, res) => {
     let { name } = req.body
     req.session.name = name
-    if(req.session.contador){
-        req.session.contador++
-        res.send(`Contador: ${req.session.contador}`)
+    console.log(req.session);
+    res.json(`BIENVENIDO ${req.session.name}`)
+})
+
+app.get('/index', (req, res) => {
+    if (req.session.name) {
+        res.send('Estás logueado')
     } else {
-        req.session.contador = 1
-        res.send(`BIENVENIDO ${req.session.name}`)
+        res.send('No estás logueado')
     }
-   /*  res.json({normales: req.cookies, firmadas: req.signedCookies}) */
 })
 
 
-app.get('/clearCookies', (req, res) => {
+app.get('/logOut', (req, res) => {
+    let name = req.session.name
     req.session.destroy( err => {
-        if (!err) res.send("Cleared!")
-        else res.send({status: "Not cleared - ERROR", body: err})
-    })
+            if (!err) res.json(`Unlogged! Hasta luego! ${name}`)
+            else res.json({status: "Not unlogged - ERROR", body: err})
+        })
 })
 
 const PORT = 8080
