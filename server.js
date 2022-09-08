@@ -120,6 +120,13 @@ app.get('/failregister', (req, res) => {
 app.get('/login', (req, res) => {
   res.render('login')
 })
+app.get('/login2', (req, res) => {
+  let { password } = req.body
+    req.session.password = password
+    console.log(req.session);
+    res.json(`BIENVENIDO ${req.session.password}`)
+})
+
 
 app.post('/login', passport.authenticate(
   'login', { 
