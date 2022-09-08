@@ -78,6 +78,7 @@ app.use(session({
       maxAge: 60000
   }
 }))
+
 app.use(cookieParser())
 app.use(passport.initialize());
 app.use(passport.session());
@@ -97,14 +98,6 @@ function isAuth(req, res, next) {
   }
 }
 
-function otroMiddleware(req, res, next) {
-  if(req.session.user === 'admin'){
-    next()
-  }else {
-    res.send('No estas autorizado')
-  }
-}
-
 /* ROUTES */
 
 /* REGISTER */
@@ -112,7 +105,12 @@ app.get('/register', (req, res) => {
   res.render('register')
 })
 
-app.post('/register', passport.authenticate('register', { failureRedirect: '/failregister', successRedirect: '/' }))
+app.post('/register', passport.authenticate(
+  'register', { 
+    failureRedirect: '/failregister',
+    successRedirect: '/' 
+  }
+))
 
 app.get('/failregister', (req, res) => {
   res.render('register-error');
@@ -123,25 +121,17 @@ app.get('/login', (req, res) => {
   res.render('login')
 })
 
-app.post('/login', passport.authenticate('login', { failureRedirect: '/faillogin', successRedirect: '/datos' }))
+app.post('/login', passport.authenticate(
+  'login', { 
+    failureRedirect: '/faillogin', 
+    successRedirect: '/datos' 
+  }
+))
 
 app.get('/faillogin', (req, res) => {
   res.render('login-error');
 })
 
-app.get('/setAdmin', (req, res) => {
-  req.session.user = 'admin';
-  res.send('admin setted')
-})
-
-app.get('/setNoAdmin', (req, res) => {
-  req.session.user = 'hola';
-  res.send('Noadmin setted')
-})
-
-app.get('/exampleProtected', otroMiddleware, (req, res) => {
-  res.send('Esta es la ruta de ejemplo protegida')
-})
 
 /* DATOS */
 app.get('/datos', isAuth, (req, res) => {
