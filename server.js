@@ -1,121 +1,175 @@
 const express = require('express')
-const cookieParser = require('cookie-parser')
 const session = require('express-session')
+const cookieParser = require('cookie-parser')
 const passport = require('passport');
 const { Strategy: LocalStrategy } = require('passport-local');
-
-//const FileStore = require('session-file-store')(session)
 const MongoStore = require('connect-mongo')
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true}
-const app = express()
-app.use(cookieParser())
-app.use(express.json())
-app.use(express.urlencoded())
+
+
+/* DATABASE */
 
 const usuarios = []
 
-
-app.use(session({
-    //store: new FileStore({path: './sesiones', ttl: 60}),
-    store: MongoStore.create({
-        mongoUrl: 'mongodb+srv://Nahuel_Maniaci:nahue123@cluster0.qvotb9b.mongodb.net/test',
-        mongoOptions: advancedOptions
-    }),
-    
-    secret: 'secreto',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 100000
-    }
-}))
-
+/* PASSPORT */
 
 passport.use('register', new LocalStrategy({
-    passReqToCallback: true},
-    (req, username, password, done) => {
-      
-        const { direccion } = req.body 
-        const usuario = usuarios.find(usuario => usuario.username == username)
-        if (usuario) {
-          return done('already registered')
-        }
-      
-        const user = {
-          username,
-          password,
-          direccion,
-        }
-        usuarios.push(user)
-      
-        return done(null, user)
-    }
-))
+  passReqToCallback: true
+}, (req, username, password, done) => {
+
+  const { direccion } = req.body
+
+  const usuario = usuarios.find(usuario => usuario.username == username)
+  if (usuario) {
+    return done('already registered')
+  }
+
+  const user = {
+    username,
+    password,
+    direccion,
+  }
+  usuarios.push(user)
+
+  return done(null, user)
+}));
+
 passport.use('login', new LocalStrategy((username, password, done) => {
 
-    const user = usuarios.find(usuario => usuario.username == username)
+  const user = usuarios.find(usuario => usuario.username == username)
+
+  if (!user) {
+    return done(null, false)
+  }
+
+  if (user.password != password) {
+    return done(null, false)
+  }
+
+  user.contador = 0
+  return done(null, user);
+}));
+
+passport.serializeUser(function (user, done) {
+  done(null, user.username);
+});
+
+passport.deserializeUser(function (username, done) {
+  const usuario = usuarios.find(usuario => usuario.username == username)
+  done(null, usuario);
+});
+
+/* SERVER */
+
+const app = express()
+
+/* MIDDLEWARE */
+
+app.use(session({
+  store: MongoStore.create({
+      mongoUrl: 'mongodb+srv://Nahuel_Maniaci:nahue123@cluster0.qvotb9b.mongodb.net/test',
+      mongoOptions: advancedOptions
+  }),
   
-    if (!user) {
-      return done(null, false)
-    }
-  
-    if (user.password != password) {
-      return done(null, false)
-    }
-  
-    user.contador = 0
-    return done(null, user);
-  }));
-  passport.serializeUser(function (user, done) {
-    done(null, user.username);
-  });
-   
-  passport.deserializeUser(function (username, done) {
-    const usuario = usuarios.find(usuario => usuario.username == username)
-    done(null, usuario);
-  });
-  
-function registered(req, res, next) {
-    if (req.isRegistered()) {
-        next()
-    } else {
-        res.redirect('/login')    
-    }
+  secret: 'secreto',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+      maxAge: 60000
+  }
+}))
+app.use(cookieParser())
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.set('view engine', 'ejs');
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+/* AUTH */
+
+function isAuth(req, res, next) {
+  if (req.isAuthenticated()) {
+    next()
+  } else {
+    res.redirect('/login')
+  }
 }
 
+function otroMiddleware(req, res, next) {
+  if(req.session.user === 'admin'){
+    next()
+  }else {
+    res.send('No estas autorizado')
+  }
+}
 
-app.post('/login', registered, (req, res) => {
-    let { name } = req.body
-    req.session.name = name
-    console.log(req.session);
-    res.json(`BIENVENIDO ${req.session.name}`)
+/* ROUTES */
+
+/* REGISTER */
+app.get('/register', (req, res) => {
+  res.render('register')
 })
 
-app.post('/registrer', (req, res) => {
-    let { name } = req.body
-    req.session.name = name
-    console.log(req.session);
-    res.json(`BIENVENIDO ${req.session.name}`)
+app.post('/register', passport.authenticate('register', { failureRedirect: '/failregister', successRedirect: '/' }))
+
+app.get('/failregister', (req, res) => {
+  res.render('register-error');
 })
 
-app.get('/index',  registered, (req, res) => {
-    if (req.session.name) {
-        res.send('Estás logueado')
-    } else {
-        res.send('No estás logueado')
-    }
+/* LOGIN */
+app.get('/login', (req, res) => {
+  res.render('login')
 })
 
+app.post('/login', passport.authenticate('login', { failureRedirect: '/faillogin', successRedirect: '/datos' }))
 
-app.get('/logOut', (req, res) => {
-    let name = req.session.name
-    req.session.destroy( err => {
-            if (!err) res.json(`Unlogged! Hasta luego! ${name}`)
-            else res.json({status: "Not unlogged - ERROR", body: err})
-        })
+app.get('/faillogin', (req, res) => {
+  res.render('login-error');
 })
 
+app.get('/setAdmin', (req, res) => {
+  req.session.user = 'admin';
+  res.send('admin setted')
+})
+
+app.get('/setNoAdmin', (req, res) => {
+  req.session.user = 'hola';
+  res.send('Noadmin setted')
+})
+
+app.get('/exampleProtected', otroMiddleware, (req, res) => {
+  res.send('Esta es la ruta de ejemplo protegida')
+})
+
+/* DATOS */
+app.get('/datos', isAuth, (req, res) => {
+  if (!req.user.contador) {
+    req.user.contador = 0
+  }
+  req.user.contador++
+
+  res.render('datos', {
+    datos: usuarios.find(usuario => usuario.username == req.user.username),
+    contador: req.user.contador
+  });
+})
+
+/* LOGOUT */
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/')
+})
+
+/* INICIO */
+app.get('/', isAuth, (req, res) => {
+  res.redirect('/datos')
+})
+
+/* LISTEN */
 const PORT = 8080
 const server = app.listen(PORT, () => {
-  console.log(`Servidor en el puerto ${PORT}`);
+  console.log(`Servidor escuchando en el puerto ${PORT}`)
 })
+server.on("error", error => console.log(`Error en servidor: ${error}`))
