@@ -1,6 +1,8 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
+const passport = require('passport');
+const { Strategy: LocalStrategy } = require('passport-local');
 
 //const FileStore = require('session-file-store')(session)
 const MongoStore = require('connect-mongo')
@@ -9,6 +11,9 @@ const app = express()
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded())
+
+const usuarios = []
+
 
 app.use(session({
     //store: new FileStore({path: './sesiones', ttl: 60}),
@@ -25,14 +30,75 @@ app.use(session({
     }
 }))
 
-app.post('/login', (req, res) => {
+
+passport.use('register', new LocalStrategy({
+    passReqToCallback: true},
+    (req, username, password, done) => {
+      
+        const { direccion } = req.body 
+        const usuario = usuarios.find(usuario => usuario.username == username)
+        if (usuario) {
+          return done('already registered')
+        }
+      
+        const user = {
+          username,
+          password,
+          direccion,
+        }
+        usuarios.push(user)
+      
+        return done(null, user)
+    }
+))
+passport.use('login', new LocalStrategy((username, password, done) => {
+
+    const user = usuarios.find(usuario => usuario.username == username)
+  
+    if (!user) {
+      return done(null, false)
+    }
+  
+    if (user.password != password) {
+      return done(null, false)
+    }
+  
+    user.contador = 0
+    return done(null, user);
+  }));
+  passport.serializeUser(function (user, done) {
+    done(null, user.username);
+  });
+   
+  passport.deserializeUser(function (username, done) {
+    const usuario = usuarios.find(usuario => usuario.username == username)
+    done(null, usuario);
+  });
+  
+function registered(req, res, next) {
+    if (req.isRegistered()) {
+        next()
+    } else {
+        res.redirect('/login')    
+    }
+}
+
+
+app.post('/login', registered, (req, res) => {
     let { name } = req.body
     req.session.name = name
     console.log(req.session);
     res.json(`BIENVENIDO ${req.session.name}`)
 })
 
-app.get('/index', (req, res) => {
+app.post('/registrer', (req, res) => {
+    let { name } = req.body
+    req.session.name = name
+    console.log(req.session);
+    res.json(`BIENVENIDO ${req.session.name}`)
+})
+
+app.get('/index',  registered, (req, res) => {
     if (req.session.name) {
         res.send('Estás logueado')
     } else {
