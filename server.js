@@ -67,16 +67,16 @@ const app = express()
 
 app.use(session({
   store: MongoStore.create({
-      mongoUrl: 'mongodb+srv://Nahuel_Maniaci:nahue123@cluster0.qvotb9b.mongodb.net/test',
+      mongoUrl: 'mongodb+srv://Nahuel_Maniaci:nahue123@cluster0.qvotb9b.mongodb.net/new',
       mongoOptions: advancedOptions
   }),
   
   secret: 'secreto',
   resave: false,
   saveUninitialized: false,
-  cookie: {
+ /*  cookie: {
       maxAge: 60000
-  }
+  } */
 }))
 
 app.use(cookieParser())
@@ -120,6 +120,8 @@ app.get('/failregister', (req, res) => {
 app.get('/login', (req, res) => {
   res.render('login')
 })
+
+
 app.get('/login2', (req, res) => {
   let { password } = req.body
     req.session.password = password
