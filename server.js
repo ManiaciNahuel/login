@@ -5,10 +5,10 @@ const passport = require('passport');
 const { Strategy: LocalStrategy } = require('passport-local');
 const MongoStore = require('connect-mongo')
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true}
-
+require('dotenv').config()
 
 /* DATABASE */
-
+ 
 const usuarios = []
 
 /* PASSPORT */
@@ -21,6 +21,7 @@ passport.use('register', new LocalStrategy({
 
   const usuario = usuarios.find(usuario => usuario.username == username)
   if (usuario) {
+    console.log(usuario);
     return done('already registered')
   }
 
@@ -81,7 +82,7 @@ app.use(session({
 
 app.use(cookieParser())
 app.use(passport.initialize());
-app.use(passport.session());
+ app.use(passport.session()); 
 
 app.set('view engine', 'ejs');
 
@@ -167,7 +168,7 @@ app.get('/', isAuth, (req, res) => {
 })
 
 /* LISTEN */
-const PORT = 8080
+const PORT =  Number(process.env.PORT ?? 0)
 const server = app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`)
 })
