@@ -82,7 +82,7 @@ app.use(session({
 
 app.use(cookieParser())
 app.use(passport.initialize());
- app.use(passport.session()); 
+app.use(passport.session()); 
 
 app.set('view engine', 'ejs');
 
@@ -129,6 +129,27 @@ app.get('/login2', (req, res) => {
     console.log(req.session);
     res.json(`BIENVENIDO ${req.session.password}`)
 })
+
+app.get('/info', (req, res) => {
+  let args;
+  if (process.argv.slice(2).length === 0) {
+    args = "Sin argumentos";
+  } else {
+    args = process.argv.slice(2);
+  }
+  const info = [
+    args, 
+    process.platform, 
+    process.version, 
+    process.memoryUsage().rss, 
+    process.argv[0], 
+    process.pid, 
+    process.cwd(), 
+];
+  console.log(info);
+  res.json(info);
+})
+
 
 
 app.post('/login', passport.authenticate(
