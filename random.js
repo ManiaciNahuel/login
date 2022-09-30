@@ -1,5 +1,5 @@
 const getRandom = (cant) => {
-	let maxNums = 100000000;
+	let maxNums = 1000;
 	const resultObj = {};
 	const cantNum = cant || maxNums;
 	for (let i = 0; i < cantNum; i++) {

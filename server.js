@@ -6,7 +6,11 @@ const { Strategy: LocalStrategy } = require('passport-local');
 const MongoStore = require('connect-mongo')
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true}
 require('dotenv').config()
-
+const cluster = require('cluster');
+const http = require('http');
+const numCPUs = require('os').cpus().length;
+const yargs = require('yargs/yargs')(process.argv.slice(2))
+const { fork } = require('child_process')
 /* DATABASE */
  
 const usuarios = []
@@ -64,6 +68,7 @@ passport.deserializeUser(function (username, done) {
 
 const app = express()
 
+
 /* MIDDLEWARE */
 
 app.use(session({
@@ -88,9 +93,7 @@ app.set('view engine', 'ejs');
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
 /* AUTH */
-
 function isAuth(req, res, next) {
   if (req.isAuthenticated()) {
     next()
@@ -98,9 +101,7 @@ function isAuth(req, res, next) {
     res.redirect('/login')
   }
 }
-
 /* ROUTES */
-
 /* REGISTER */
 app.get('/register', (req, res) => {
   res.render('register')
@@ -122,13 +123,30 @@ app.get('/login', (req, res) => {
   res.render('login')
 })
 
+app.post('/login', passport.authenticate(
+  'login', { 
+    failureRedirect: '/faillogin', 
+    successRedirect: '/datos' 
+  }
+))
 
-app.get('/login2', (req, res) => {
-  let { password } = req.body
-    req.session.password = password
-    console.log(req.session);
-    res.json(`BIENVENIDO ${req.session.password}`)
+app.get('/faillogin', (req, res) => {
+  res.render('login-error');
 })
+
+const argv = yargs
+    .option('p', {
+        alias: 'puerto',
+        default: 8080
+    })
+    .option('m', {
+        alias: 'mode',
+        default: 'FORK',
+        type: "string"
+    })
+    .argv
+
+
 
 app.get('/info', (req, res) => {
   let args;
@@ -145,24 +163,11 @@ app.get('/info', (req, res) => {
     process.argv[0], 
     process.pid, 
     process.cwd(), 
+    numCPUs
 ];
   console.log(info);
   res.json(info);
 })
-
-
-
-app.post('/login', passport.authenticate(
-  'login', { 
-    failureRedirect: '/faillogin', 
-    successRedirect: '/datos' 
-  }
-))
-
-app.get('/faillogin', (req, res) => {
-  res.render('login-error');
-})
-
 
 /* DATOS */
 app.get('/datos', isAuth, (req, res) => {
@@ -188,9 +193,40 @@ app.get('/', isAuth, (req, res) => {
   res.redirect('/datos')
 })
 
-/* LISTEN */
-const PORT =  Number(process.env.PORT ?? 0)
-const server = app.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`)
-})
-server.on("error", error => console.log(`Error en servidor: ${error}`))
+const portArgs = argv.puerto;
+const PORT = portArgs || process.env.PORT;
+console.log(process.env.PORT);
+console.log(portArgs);
+console.log(PORT);
+const serverMode = argv.m || "FORK";
+
+/* MASTER */
+if (serverMode == "CUSTER"){
+  if (cluster.isMaster) {
+    console.log(numCPUs);
+    console.log(`PID MASTER ${process.pid}`);
+  
+    for (let i = 0; i < numCPUs; i++){
+      cluster.fork()
+    }
+  
+    cluster.on('exit', worker => {
+      console.log('Worker', worker.process.pid, 'died', new Date().toLocaleString());
+      cluster.fork()
+    })
+  }
+  /* LISTEN */
+  else {
+    const server = app.listen(PORT, () => {
+      console.log(`Servidor escuchando en el puerto ${PORT} - PID WORKER: ${process.pid}`)
+    })
+    server.on("error", error => console.log(`Error en servidor: ${error}`))
+  }
+
+}else {
+  const server = app.listen(PORT, () => {
+    console.log(`Servidor escuchando en el puerto ${PORT} - PID WORKER: ${process.pid}`)
+  })
+  server.on("error", error => console.log(`Error en servidor: ${error}`))
+  console.log("No es custer");
+}

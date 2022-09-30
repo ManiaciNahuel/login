@@ -2,16 +2,26 @@ const yargs = require('yargs/yargs')(process.argv.slice(2))
 const { fork } = require('child_process')
 
 
-const { puerto} = yargs
-    .alias({p: 'puerto'})
-    .default({puerto: 8080})
+const argv = yargs
+    .option('p', {
+        alias: 'puerto',
+        default: 8080
+    })
+    .option('m', {
+        alias: 'mode',
+        default: 'FORK',
+        type: "string"
+    })
     .argv
 let args;
+console.log(argv);
+
 if (process.argv.slice(2).length === 0) {
     args = "Sin argumentos";
 } else {
     args = process.argv.slice(2);
 }
+
 const info = [
     args, 
     process.platform, 
@@ -22,7 +32,6 @@ const info = [
     process.cwd(), 
 ];
 console.log(info);
-console.log(puerto);
 
 const express = require('express')
 const app =  express()
