@@ -1,0 +1,127 @@
+Statistical profiling result from con-log-v8.log, (13737 ticks, 0 unaccounted, 0 excluded).
+
+ [Shared libraries]:
+   ticks  total  nonlib   name
+  13425   97.7%          C:\WINDOWS\SYSTEM32\ntdll.dll
+    309    2.2%          C:\Program Files\nodejs\node.exe
+      1    0.0%          C:\WINDOWS\System32\KERNEL32.DLL
+
+ [JavaScript]:
+   ticks  total  nonlib   name
+      1    0.0%   50.0%  LazyCompile: *pushAsyncContext internal/async_hooks.js:527:26
+      1    0.0%   50.0%  LazyCompile: *_storeHeader _http_outgoing.js:362:22
+
+ [C++]:
+   ticks  total  nonlib   name
+
+ [Summary]:
+   ticks  total  nonlib   name
+      2    0.0%  100.0%  JavaScript
+      0    0.0%    0.0%  C++
+     11    0.1%  550.0%  GC
+  13735  100.0%          Shared libraries
+
+ [C++ entry points]:
+   ticks    cpp   total   name
+
+ [Bottom up (heavy) profile]:
+  Note: percentage shows a share of a particular caller in the total
+  amount of its parent calls.
+  Callers occupying less than 1.0% are not shown.
+
+   ticks parent  name
+  13425   97.7%  C:\WINDOWS\SYSTEM32\ntdll.dll
+
+    309    2.2%  C:\Program Files\nodejs\node.exe
+    193   62.5%    C:\Program Files\nodejs\node.exe
+    112   58.0%      LazyCompile: ~handleWriteReq internal/stream_base_commons.js:47:24
+    112  100.0%        LazyCompile: ~writeGeneric internal/stream_base_commons.js:143:22
+     68   60.7%          LazyCompile: ~Socket._writeGeneric net.js:772:42
+     68  100.0%            LazyCompile: ~Socket._write net.js:809:35
+     32   28.6%          LazyCompile: *Writable.write internal/streams/writable.js:258:36
+     32  100.0%            LazyCompile: ~value internal/console/constructor.js:261:20
+     12   10.7%          LazyCompile: *writeOrBuffer internal/streams/writable.js:334:23
+     12  100.0%            LazyCompile: ~Writable.write internal/streams/writable.js:258:36
+     21   10.9%      LazyCompile: ~writevGeneric internal/stream_base_commons.js:118:23
+     21  100.0%        LazyCompile: ~Socket._writeGeneric net.js:772:42
+     21  100.0%          LazyCompile: ~Socket._writev net.js:804:36
+     21  100.0%            LazyCompile: ~doWrite internal/streams/writable.js:367:17
+      6    3.1%      LazyCompile: ~<anonymous> D:\Cursos\Coder House\BackEnd\Practica\login\server.js:152:18
+      6  100.0%        LazyCompile: ~handle D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\layer.js:86:49
+      6  100.0%          LazyCompile: ~next D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\route.js:116:16
+      6  100.0%            LazyCompile: ~dispatch D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\route.js:98:45
+      4    2.1%      LazyCompile: ~compileForInternalLoader internal/bootstrap/loaders.js:273:27
+      3   75.0%        LazyCompile: ~nativeModuleRequire internal/bootstrap/loaders.js:306:29
+      1   33.3%          LazyCompile: ~get dns.js:333:8
+      1  100.0%            C:\Program Files\nodejs\node.exe
+      1   33.3%          Eval: ~<anonymous> internal/process/esm_loader.js:1:1
+      1  100.0%            LazyCompile: ~compileForInternalLoader internal/bootstrap/loaders.js:273:27
+      1   33.3%          Eval: ~<anonymous> internal/bootstrap/node.js:1:1
+      1   25.0%        LazyCompile: ~compileForPublicLoader internal/bootstrap/loaders.js:220:25
+      1  100.0%          LazyCompile: ~loadNativeModule internal/modules/cjs/helpers.js:35:26
+      1  100.0%            LazyCompile: ~Module._load internal/modules/cjs/loader.js:725:24
+      3    1.6%      LazyCompile: ~wrapSafe internal/modules/cjs/loader.js:986:18
+      3  100.0%        LazyCompile: ~Module._compile internal/modules/cjs/loader.js:1039:37
+      3  100.0%          LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:1094:37
+      3  100.0%            LazyCompile: ~Module.load internal/modules/cjs/loader.js:938:33
+      3    1.6%      LazyCompile: ~realpathSync fs.js:1722:22
+      3  100.0%        LazyCompile: ~toRealPath internal/modules/cjs/loader.js:361:20
+      3  100.0%          LazyCompile: ~tryFile internal/modules/cjs/loader.js:352:17
+      2   66.7%            LazyCompile: ~tryExtensions internal/modules/cjs/loader.js:368:23
+      1   33.3%            LazyCompile: ~tryPackage internal/modules/cjs/loader.js:306:20
+      3    1.6%      C:\Program Files\nodejs\node.exe
+      1   33.3%        LazyCompile: ~fromString D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\utils.js:316:22
+      1  100.0%          LazyCompile: ~ns D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\utils.js:294:12
+      1  100.0%            LazyCompile: ~measureRoundTripTime D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\sdam\monitor.js:288:30
+      1   33.3%        LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:462:28
+      1  100.0%          LazyCompile: ~Module._resolveFilename internal/modules/cjs/loader.js:816:35
+      1  100.0%            LazyCompile: ~Module._load internal/modules/cjs/loader.js:725:24
+      1   33.3%        LazyCompile: ~<anonymous> D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\yargs\build\index.cjs:1:1155
+      1  100.0%          C:\Program Files\nodejs\node.exe
+      1  100.0%            LazyCompile: ~o D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\yargs\build\index.cjs:1:937
+      2    1.0%      LazyCompile: ~toRealPath internal/modules/cjs/loader.js:361:20
+      2  100.0%        LazyCompile: ~tryFile internal/modules/cjs/loader.js:352:17
+      2  100.0%          LazyCompile: ~tryExtensions internal/modules/cjs/loader.js:368:23
+      2  100.0%            LazyCompile: ~Module._findPath internal/modules/cjs/loader.js:462:28
+      2    1.0%      LazyCompile: ~openSync fs.js:488:18
+      2  100.0%        LazyCompile: ~readFileSync fs.js:390:22
+      1   50.0%          LazyCompile: ~Module._extensions..json internal/modules/cjs/loader.js:1119:39
+      1  100.0%            LazyCompile: ~Module.load internal/modules/cjs/loader.js:938:33
+      1   50.0%          LazyCompile: ~Module._extensions..js internal/modules/cjs/loader.js:1094:37
+      1  100.0%            LazyCompile: ~Module.load internal/modules/cjs/loader.js:938:33
+      2    1.0%      LazyCompile: ~initialize D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\passport\lib\middleware\initialize.js:51:29
+      2  100.0%        LazyCompile: *trim_prefix D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\index.js:293:23
+      2  100.0%          LazyCompile: *next D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\index.js:177:16
+      2  100.0%            LazyCompile: ~cookieParser D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\cookie-parser\index.js:44:32
+      2    1.0%      LazyCompile: *next D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\index.js:177:16
+      1   50.0%        LazyCompile: ~session D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express-session\index.js:179:26
+      1  100.0%          LazyCompile: *trim_prefix D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\index.js:293:23
+      1  100.0%            LazyCompile: *next D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\index.js:177:16
+      1   50.0%        LazyCompile: ~cookieParser D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\cookie-parser\index.js:44:32
+      1  100.0%          LazyCompile: *trim_prefix D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\index.js:293:23
+      1  100.0%            LazyCompile: *next D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\express\lib\router\index.js:177:16
+      7    2.3%    LazyCompile: ~listOnTimeout internal/timers.js:505:25
+      7  100.0%      LazyCompile: ~processTimers internal/timers.js:485:25
+      5    1.6%    LazyCompile: ~hrtime internal/process/per_thread.js:122:18
+      5  100.0%      LazyCompile: ~now D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\utils.js:571:13
+      4   80.0%        LazyCompile: ~measureRoundTripTime D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\sdam\monitor.js:288:30
+      4  100.0%          LazyCompile: ~<anonymous> D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\sdam\monitor.js:304:58
+      4  100.0%            LazyCompile: ~listOnTimeout internal/timers.js:505:25
+      1   20.0%        LazyCompile: ~<anonymous> D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\sdam\monitor.js:177:73
+      1  100.0%          LazyCompile: ~onMessage D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\cmap\connection.js:156:14
+      1  100.0%            LazyCompile: ~<anonymous> D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\cmap\connection.js:60:44
+      4    1.3%    LazyCompile: ~fromString D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\utils.js:316:22
+      4  100.0%      LazyCompile: ~ns D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\utils.js:294:12
+      4  100.0%        LazyCompile: ~measureRoundTripTime D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\sdam\monitor.js:288:30
+      4  100.0%          LazyCompile: ~<anonymous> D:\Cursos\Coder House\BackEnd\Practica\login\node_modules\mongodb\lib\sdam\monitor.js:304:58
+      4  100.0%            LazyCompile: ~listOnTimeout internal/timers.js:505:25
+      4    1.3%    LazyCompile: ~formatRaw internal/util/inspect.js:777:19
+      2   50.0%      LazyCompile: ~formatValue internal/util/inspect.js:708:21
+      2  100.0%        LazyCompile: ~inspect internal/util/inspect.js:265:17
+      2  100.0%          LazyCompile: ~formatWithOptionsInternal internal/util/inspect.js:1864:35
+      2  100.0%            LazyCompile: ~formatWithOptions internal/util/inspect.js:1856:27
+      2   50.0%      LazyCompile: *formatValue internal/util/inspect.js:708:21
+      2  100.0%        LazyCompile: *inspect internal/util/inspect.js:265:17
+      2  100.0%          LazyCompile: ~formatWithOptionsInternal internal/util/inspect.js:1864:35
+      2  100.0%            LazyCompile: ~formatWithOptions internal/util/inspect.js:1856:27
+

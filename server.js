@@ -11,6 +11,8 @@ const http = require('http');
 const numCPUs = require('os').cpus().length;
 const yargs = require('yargs/yargs')(process.argv.slice(2))
 const { fork } = require('child_process')
+const compression = require('compression');
+const logger = require('./logger');
 /* DATABASE */
  
 const usuarios = []
@@ -25,7 +27,6 @@ passport.use('register', new LocalStrategy({
 
   const usuario = usuarios.find(usuario => usuario.username == username)
   if (usuario) {
-    console.log(usuario);
     return done('already registered')
   }
 
@@ -88,7 +89,7 @@ app.use(session({
 app.use(cookieParser())
 app.use(passport.initialize());
 app.use(passport.session()); 
-
+app.use(compression())
 app.set('view engine', 'ejs');
 
 app.use(express.json())
@@ -147,7 +148,7 @@ const argv = yargs
     .argv
 
 
-
+/* INFO */
 app.get('/info', (req, res) => {
   let args;
   if (process.argv.slice(2).length === 0) {
@@ -167,6 +168,37 @@ app.get('/info', (req, res) => {
 ];
   console.log(info);
   res.json(info);
+})
+
+app.get('/infoZip', compression(), (req, res) => {
+  let args;
+  if (process.argv.slice(2).length === 0) {
+    args = "Sin argumentos";
+  } else {
+    args = process.argv.slice(2);
+  }
+  const info = [
+    args, 
+    process.platform, 
+    process.version, 
+    process.memoryUsage().rss, 
+    process.argv[0], 
+    process.pid, 
+    process.cwd(), 
+    numCPUs
+];
+  logger.info(info);
+  res.json(info);
+})
+
+/* RANDOM */
+app.get('/api/random', (req, res) => {
+  const { cant } = req.query;
+  const forked = fork("./random.js");
+  forked.send({ msg: "start", cant });
+  forked.on("message", (msg) => {
+    res.json({ msg });  
+});
 })
 
 /* DATOS */
@@ -193,25 +225,40 @@ app.get('/', isAuth, (req, res) => {
   res.redirect('/datos')
 })
 
+app.get('/warn', (req, res) => {
+  res.send(
+    logger.warn("warn")
+  )
+})
+app.get('/infoo', (req, res) => {
+  res.send(
+    logger.info("info")
+  )
+})
+app.get('/error', (req, res) => {
+  res.send(
+    logger.error("error")
+  )
+})
+
+
+/* app.use(( req, res) => {
+  res.status(404).json("Not found")
+}); */
+
 const portArgs = argv.puerto;
 const PORT = portArgs || process.env.PORT;
-console.log(process.env.PORT);
-console.log(portArgs);
-console.log(PORT);
 const serverMode = argv.m || "FORK";
 
 /* MASTER */
 if (serverMode == "CUSTER"){
   if (cluster.isMaster) {
-    console.log(numCPUs);
-    console.log(`PID MASTER ${process.pid}`);
-  
     for (let i = 0; i < numCPUs; i++){
       cluster.fork()
     }
   
     cluster.on('exit', worker => {
-      console.log('Worker', worker.process.pid, 'died', new Date().toLocaleString());
+      logger.info('Worker', worker.process.pid, 'died', new Date().toLocaleString());
       cluster.fork()
     })
   }
@@ -220,13 +267,12 @@ if (serverMode == "CUSTER"){
     const server = app.listen(PORT, () => {
       console.log(`Servidor escuchando en el puerto ${PORT} - PID WORKER: ${process.pid}`)
     })
-    server.on("error", error => console.log(`Error en servidor: ${error}`))
+    server.on("error", error => logger.error(`Error en servidor: ${error}`))
   }
 
 }else {
   const server = app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT} - PID WORKER: ${process.pid}`)
   })
-  server.on("error", error => console.log(`Error en servidor: ${error}`))
-  console.log("No es custer");
+  server.on("error", error => logger.error(`Error en servidor: ${error}`))
 }
