@@ -247,7 +247,8 @@ app.get('/error', (req, res) => {
 }); */
 
 const portArgs = argv.puerto;
-const PORT = process.env.PORT || 8080;
+/* const PORT = process.env.PORT || 8080; */
+app.set('port', (process.env.PORT || 8080))
 const serverMode = argv.m || "FORK";
 
 /* MASTER */
@@ -264,15 +265,15 @@ if (serverMode == "CUSTER"){
   }
   /* LISTEN */
   else {
-    const server = app.listen(PORT, () => {
-      console.log(`Servidor escuchando en el puerto ${PORT} - PID WORKER: ${process.pid}`)
+    const server = app.listen(app.get('port'), function() {
+      console.log(`Servidor escuchando en el puerto ${app.get('port')} - PID WORKER: ${process.pid}`)
     })
     server.on("error", error => logger.error(`Error en servidor: ${error}`))
   }
 
 }else {
-  const server = app.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto ${PORT} - PID WORKER: ${process.pid}`)
+  const server = app.listen(app.get('port'), function() {
+    console.log(`Servidor escuchando en el puerto ${app.get('port')} - PID WORKER: ${process.pid}`)
   })
   server.on("error", error => logger.error(`Error en servidor: ${error}`))
 }
