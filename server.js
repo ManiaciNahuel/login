@@ -247,7 +247,7 @@ app.get('/error', (req, res) => {
 }); */
 
 const portArgs = argv.puerto;
-const PORT = portArgs || 8080;
+const PORT = process.env.PORT || 8080;
 const serverMode = argv.m || "FORK";
 
 /* MASTER */
