@@ -1,1 +1,7 @@
 /node_modules
+*all-the-logs.log
+*error.log
+*warn.log
+*benchmark.js
+/0x
+/artillery
